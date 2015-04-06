@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			 android:layout_width="wrap_content"
+			 android:layout_height="match_parent">
+
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="240dp"
+		android:layout_height="match_parent"
+		android:gravity="center_horizontal"
+		android:paddingTop="5dp"
+		android:background="@drawable/menu_background">
+
+		<ImageView
+			android:id="@+id/ic_play"
+			android:layout_width="50dp"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true"
+			android:src="@drawable/ic_play"
+			android:layout_margin="7dp"/>
+
+		<ImageView
+			android:id="@+id/ic_reload"
+			android:layout_width="50dp"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true"
+			android:src="@drawable/ic_reload"
+			android:layout_margin="7dp"/>
+
+		<ImageView
+			android:id="@+id/ic_menu"
+			android:layout_width="50dp"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true"
+			android:src="@drawable/ic_menu"
+			android:layout_margin="7dp"/>
+
+		<ImageView
+			android:id="@+id/ic_music"
+			android:layout_width="50dp"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true"
+			android:src="@drawable/ic_music_on"
+			android:layout_margin="7dp"/>
+	</LinearLayout>
+</FrameLayout>

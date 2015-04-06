@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.leandroideias.baseutils.GridSquareLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:background="@drawable/border_background"
+	android:gravity="center">
+	<ImageView
+		android:id="@+id/imageViewItemGridJogarJogoDaMemoria"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="7dp"
+		android:layout_gravity="center"
+		android:adjustViewBounds="true"
+		android:scaleType="fitXY"
+		android:src="@drawable/brasil2" />
+</com.leandroideias.baseutils.GridSquareLayout>

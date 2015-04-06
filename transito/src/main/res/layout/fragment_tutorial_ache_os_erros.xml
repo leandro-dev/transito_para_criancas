@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="#A0000000">
+	<Button
+		android:id="@+id/btnNext"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:text="Próximo"/>
+	<Button
+		android:id="@+id/btnClose"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		android:text="Fechar"/>
+	<LinearLayout
+		android:layout_width="500dp"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:gravity="center_horizontal"
+		android:orientation="vertical">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="30dp"
+			android:textColor="#FFFFFF"
+			android:text="Ache os errros"/>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="22dp"
+			android:textColor="#FFFFFF"
+			android:text="Neste jogo você irá ver uma imagem de uma cidade, com alguns motoristas ou pedestres cometendo infrações."/>
+		</LinearLayout>
+</RelativeLayout>

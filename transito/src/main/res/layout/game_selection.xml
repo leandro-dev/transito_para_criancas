@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:orientation="horizontal"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent"
+			  android:weightSum="2">
+	<Button
+		android:id="@+id/buttonAcheOsErros"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_weight="1"
+		android:text="Ache os erros"
+		android:layout_margin="25dp"/>
+	<Button
+		android:id="@+id/buttonJogoDaMemoria"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_weight="1"
+		android:text="Jogo da memória"
+		android:layout_margin="25dp"/>
+</LinearLayout>

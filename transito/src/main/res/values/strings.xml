@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Trânsito</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_refresh">Atualizar</string>
+    <string name="action_save">Salvar</string>
+    <string name="nivel_completo">Nível completo</string>
+    <string name="voce_falhou">Você falhou</string>
+    <string name="erros_dois_pontos">Erros:</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+	<string name="qual_o_significado">Qual é o significado?</string>
+    <string name="confirmar">Confirmar</string>
+	<string name="correct">Correto</string>
+	<string name="wrong">Errado</string>
+
+	<!-- Significados das placas -->
+	<string name="sig_placa_a1b">Curva acentuada à direita</string>
+	<string name="sig_placa_a2b">Curva à direita</string>
+	<string name="sig_placa_a7b">Via lateral à direita</string>
+	<string name="sig_placa_a14">Semáforo à frente</string>
+	<string name="sig_placa_a18">Saliência ou lombada</string>
+	<string name="sig_placa_a19">Depressão</string>
+	<string name="sig_placa_a20a">Declive acentuado</string>
+	<string name="sig_placa_a22">Ponte estreita</string>
+	<string name="sig_placa_a24">Obras</string>
+	<string name="sig_placa_a32b">Passagem sinalizada de pedestres</string>
+	<string name="sig_placa_a35">Animais</string>
+	<string name="sig_placa_a42a">Início de pista dupla</string>
+	<string name="sig_placa_a43">Aeroporto</string>
+	<string name="sig_placa_a44">Vento lateral</string>
+	<string name="sig_placa_a45">Rua sem saída</string>
+	<string name="sig_placa_r1">Parada obrigatória</string>
+	<string name="sig_placa_r2">Dê a preferência</string>
+	<string name="sig_placa_r3">Sentido proibido</string>
+	<string name="sig_placa_r4b">Proibido virar à direita</string>
+	<string name="sig_placa_r5a">Proibido retornar à esquerda</string>
+	<string name="sig_placa_r6a">Proibido estacionar</string>
+	<string name="sig_placa_r6b">Estacionamento regulamentado</string>
+	<string name="sig_placa_r6c">Proibido parar e estacionar</string>
+	<string name="sig_placa_r7">Proibido ultrapassar</string>
+	<string name="sig_placa_r12">Proibido trânsito de bicicletas</string>
+	<string name="sig_placa_r15">Altura máxima permitida</string>
+	<string name="sig_placa_r19">Velocidade máxima permitida</string>
+	<string name="sig_placa_r25b">Vire à direita</string>
+	<string name="sig_placa_r25d">Siga em frente ou à direita</string>
+	<string name="sig_placa_r26">Siga em frente</string>
+	<string name="sig_placa_r28">Duplo sentido de circulação</string>
+	<string name="sig_placa_r29">Proibido trânsito de pedestres</string>
+
+</resources>
