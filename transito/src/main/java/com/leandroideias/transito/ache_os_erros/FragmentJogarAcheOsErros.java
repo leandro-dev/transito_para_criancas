@@ -1,13 +1,10 @@
 package com.leandroideias.transito.ache_os_erros;
 
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,6 +16,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.leandroideias.baseutils.BaseFragment;
 import com.leandroideias.baseutils.CustomAlert;
 import com.leandroideias.transito.R;
@@ -64,6 +65,9 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		tutorialMode = (getArguments().getInt("extraFase", 0) == 1);
 		View view = inflater.inflate(R.layout.jogar_ache_os_erros, container, false);
 		initView(view);
+		if(tutorialMode){
+			startTutorial();
+		}
 		return view;
 	}
 
@@ -139,7 +143,7 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 					}
 				});
 				alert.createDialog().show();
-				break;
+				return;
 		}
 		if(tags != null){
 			total = tags.length - 1;
@@ -193,19 +197,26 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		}
 	}
 
-	private void criaEfeito(int posX, int posY, boolean correto){
+	/**
+	 * Método responsável por criar uma imagem na tela representando se o usuário acertou ou errou.
+	 * @param posX Posição no eixo X aonde a imagem deve ser criada
+	 * @param posY Posição no eixo Y aonde a imagem deve ser criada
+	 * @param acerto Booleano que indica se o usuário acertou ou errou
+	 */
+	private void criaEfeito(int posX, int posY, boolean acerto){
 		posX -= frameEfeitos.getLeft();
 		posY -= frameEfeitos.getTop();
 
+		//Definindo o tamanho da imagem que será exibida (80dp)
 		int pixelSize = (int) (getResources().getDisplayMetrics().density * 80 + 0.5f);
 
 		final ImageView imageView = new ImageView(getActivity());
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(pixelSize, pixelSize);
 		params.gravity = Gravity.TOP | Gravity.LEFT;
-		params.leftMargin = posX;// - pixelSize/2;
-		params.topMargin = posY;// - pixelSize/2;
+		params.leftMargin = posX;
+		params.topMargin = posY;
 		imageView.setLayoutParams(params);
-		if(correto) {
+		if(acerto) {
 			imageView.setImageResource(android.R.drawable.star_big_on);
 		} else {
 			imageView.setImageResource(R.drawable.ic_close);
@@ -240,12 +251,14 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		}
 	}
 
-	private float scaleXFactor = 1, scaleYFactor = 1;
+	/**
+	 * Método responsável por criar as imagens do jogo na tela.
+	 * @param tag Contém informações sobre a imagem que deve ser criada.
+	 */
 	private void criaView(MyImageViewTag tag){
-		ImageView imageView;
 		if(!tag.isPositive()){
 			//Background image
-			imageView = new ImageView(getActivity());
+			ImageView imageView = new ImageView(getActivity());
 			imageView.setImageResource(tag.getImageResId());
 			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
 			params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
@@ -257,7 +270,7 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 			layoutImagens.addView(imageView);
 		} else {
 			//Error image
-			imageView = new MyImageView(getActivity());
+			ImageView imageView = new MyImageView(getActivity());
 			imageView.setImageResource(tag.getImageResId());
 			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
 			params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
@@ -277,7 +290,6 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		if(!(image.getTag() instanceof MyImageViewTag)) return false;
 		MyImageViewTag tag = (MyImageViewTag) image.getTag();
 		boolean positivo = tag.isPositive();
-
 		if(!positivo){
 			erros++;
 			criaEfeito((int) event.getX() + view.getLeft(), (int) event.getY() + view.getTop(), false);
@@ -293,25 +305,6 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 
 			int x = (int) (touchX /scaleXFactor);
 			int y = (int) (touchY / scaleYFactor);
-			/*float[] touchXY = new float[]{touchX / scaleXFactor, touchY / scaleYFactor};
-
-			Matrix invertMatrix = new Matrix();
-			image.getImageMatrix().invert(invertMatrix);
-
-			invertMatrix.mapPoints(touchXY);
-			int x = Integer.valueOf((int) touchXY[0]);
-			int y = Integer.valueOf((int) touchXY[1]);
-
-			if(x < 0) x = 0;
-			else if(x >= bitmap.getWidth()) x = bitmap.getWidth() - 1;
-
-			if(y < 0) y = 0;
-			else if(y >= bitmap.getHeight()) y = bitmap.getHeight() - 1;*/
-
-			//Verifica se a região clicada está dentro dos limites da imagem
-
-
-//			Log.i("Teste", "Clicou nos pontos: (" + x + ", " + y + ");");
 
 			Rect rect = new Rect(
 					(int) tag.getStartX(),
@@ -330,6 +323,7 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 			}
 
 
+			//TODO Verificar o canal alfa da região exata do clique. Se for transparente, deve considerar um erro.
 			//Verifica o canal alfa daquela parte do clique.
 			/*int alpha = Color.alpha(bitmap.getPixel(x, y));
 			if(alpha > 126) {
@@ -343,6 +337,14 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 				return false;
 			}*/
 		}
+	}
+
+	private void startTutorial(){
+		ShowcaseView sv = new ShowcaseView.Builder(getActivity())
+				.setTarget(new ViewTarget(icPausar))
+				.setContentTitle("This is a demo")
+				.setStyle(R.style.Transparent)
+				.build();
 	}
 
 	/*private class TutorialShowcaseListener implements OnShowcaseEventListener {
