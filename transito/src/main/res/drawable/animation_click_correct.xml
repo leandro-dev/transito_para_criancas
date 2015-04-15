@@ -2,6 +2,7 @@
 
 <animation-list xmlns:android="http://schemas.android.com/apk/res/android"
 				android:oneshot="true">
+
 	<item
 		android:drawable="@android:drawable/star_big_on"
 		android:duration="500"/>

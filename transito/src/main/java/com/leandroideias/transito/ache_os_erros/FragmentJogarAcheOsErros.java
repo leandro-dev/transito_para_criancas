@@ -1,16 +1,20 @@
 package com.leandroideias.transito.ache_os_erros;
 
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -124,16 +128,6 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 						new MyImageViewTag(R.drawable.level1_erro6, true, 815f, 328f, 153f, 62f, 8f, 213f)
 				};
 				break;
-			case 10:
-				/*backgroundImageRes = R.drawable.level2_background;
-				errosRes = new int[]{
-						R.drawable.level2_erro1,
-						R.drawable.level2_erro2,
-						R.drawable.level2_erro3,
-						R.drawable.level2_erro4,
-						R.drawable.level2_erro5
-				};
-				break;*/
 			default:
 				CustomAlert alert = new CustomAlert(getActivity(), "Atenção", "Essa fase ainda não existe.", "Ok", null, false);
 				alert.setDialogButtonClickListener(alert.new DialogButtonClickListener() {
@@ -159,12 +153,6 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 
 
 	}
-
-	/*@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
-		Log.i("Teste", "aqui ó: " + layoutImagens.getWidth());
-	}*/
 
 	private void updateTop(){
 		if(acertos > total) acertos = total;
@@ -211,21 +199,35 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 
 		int pixelSize = (int) (getResources().getDisplayMetrics().density * 80 + 0.5f);
 
-		ImageView imageView = new ImageView(getActivity());
+		final ImageView imageView = new ImageView(getActivity());
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(pixelSize, pixelSize);
 		params.gravity = Gravity.TOP | Gravity.LEFT;
-		params.leftMargin = posX - pixelSize/2;
-		params.topMargin = posY - pixelSize/2;
+		params.leftMargin = posX;// - pixelSize/2;
+		params.topMargin = posY;// - pixelSize/2;
 		imageView.setLayoutParams(params);
 		if(correto) {
-			imageView.setBackgroundResource(R.drawable.animation_click_correct);
+			imageView.setImageResource(android.R.drawable.star_big_on);
 		} else {
-			imageView.setBackgroundResource(R.drawable.animation_click_error);
+			imageView.setImageResource(R.drawable.ic_close);
 		}
-		((AnimationDrawable) imageView.getBackground()).start();
-//		imageView.offsetLeftAndRight((int) posX - 50);
-//		imageView.offsetTopAndBottom((int) posY - 50);
+		Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.animation_click);
+		animation.setAnimationListener(new Animation.AnimationListener() {
+			public void onAnimationStart(Animation animation) {}
+			public void onAnimationEnd(Animation animation) {
+				imageView.postDelayed(new Runnable(){
+					public void run() {
+						try {
+							frameEfeitos.removeView(imageView);
+						} catch(Exception e){}
+					}
+				}, 300);
+			}
+			public void onAnimationRepeat(Animation animation) {}
+		});
+
 		frameEfeitos.addView(imageView);
+		animation.setStartOffset(0);
+		imageView.startAnimation(animation);
 	}
 
 	private void criaEstrelas(){
