@@ -343,7 +343,7 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		ShowcaseView sv = new ShowcaseView.Builder(getActivity())
 				.setTarget(new ViewTarget(icPausar))
 				.setContentTitle("This is a demo")
-				.setStyle(R.style.Transparent)
+//				.setStyle(R.style.Transparent)
 				.build();
 	}
 

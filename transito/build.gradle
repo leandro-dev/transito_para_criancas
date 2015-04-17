@@ -20,9 +20,9 @@ android {
 
 dependencies {
     compile project(':baseUtils')
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:support-v4:+'
     compile 'com.android.support:recyclerview-v7:22.+'
-    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
+    compile project(':showcaseview')
 }
