@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.SpannableString;
@@ -43,9 +45,11 @@ class TextDrawer {
     private float[] mBestTextPosition = new float[3];
     private DynamicLayout mDynamicTitleLayout;
     private DynamicLayout mDynamicDetailLayout;
+	private Rect mRectBackground;
     private TextAppearanceSpan mTitleSpan;
     private TextAppearanceSpan mDetailSpan;
     private boolean hasRecalculated;
+	private Drawable backgroundDrawable;
 
     public TextDrawer(Resources resources, ShowcaseAreaCalculator calculator, Context context) {
         padding = resources.getDimension(R.dimen.text_padding);
@@ -59,19 +63,67 @@ class TextDrawer {
 
         textPaint = new TextPaint();
         textPaint.setAntiAlias(true);
+
+	    backgroundDrawable = context.getResources().getDrawable(R.drawable.text_background);
     }
 
     public void draw(Canvas canvas) {
         if (shouldDrawText()) {
             float[] textPosition = getBestTextPosition();
+	        if(hasRecalculated){
+		        float density = context.getResources().getDisplayMetrics().density;
+		        int padding = (int) (10 * density);
+		        textPosition[0] -= padding;
+		        textPosition[2] -= 2*padding;
 
-            if (!TextUtils.isEmpty(mTitle)) {
+		        if (!TextUtils.isEmpty(mTitle)) {
+			        mDynamicTitleLayout = new DynamicLayout(mTitle, titlePaint,
+					        (int) textPosition[2], Layout.Alignment.ALIGN_CENTER,
+					        1.0f, 1.0f, true);
+		        }
+
+		        if (!TextUtils.isEmpty(mDetails)) {
+			        mDynamicDetailLayout = new DynamicLayout(mDetails, textPaint,
+					        (int) textPosition[2],
+					        Layout.Alignment.ALIGN_CENTER,
+					        1.2f, 1.0f, true);
+		        }
+
+		        if(backgroundDrawable != null) {
+			        Rect rectTitle = null, rectDetail = null;
+			        if (mDynamicTitleLayout != null) {
+				        rectTitle = new Rect(0, 0, mDynamicTitleLayout.getWidth(), mDynamicTitleLayout.getHeight());
+			        }
+			        if (mDynamicDetailLayout != null) {
+				        int offsetForTitle = mDynamicTitleLayout != null ? mDynamicTitleLayout.getHeight() : 0;
+				        rectDetail = new Rect(0, offsetForTitle, mDynamicDetailLayout.getWidth(), mDynamicDetailLayout.getHeight() + offsetForTitle);
+			        }
+			        if (rectDetail == null) {
+				        mRectBackground = rectTitle;
+			        } else if (rectTitle == null) {
+				        mRectBackground = rectDetail;
+			        } else {
+				        mRectBackground = new Rect(rectTitle.left, rectTitle.top, rectDetail.right, rectDetail.bottom);
+			        }
+//			        mRectBackground.left -= padding;
+			        mRectBackground.top -= padding;
+//			        mRectBackground.right -= 2*padding;
+			        mRectBackground.bottom += padding;
+		        }
+	        }
+
+
+
+	        if(backgroundDrawable != null && mRectBackground != null){
+		        canvas.save();
+		        canvas.translate(textPosition[0], textPosition[1]);
+		        backgroundDrawable.setBounds(mRectBackground);
+		        backgroundDrawable.draw(canvas);
+		        canvas.restore();
+	        }
+
+	        if (!TextUtils.isEmpty(mTitle)) {
                 canvas.save();
-                if (hasRecalculated) {
-                    mDynamicTitleLayout = new DynamicLayout(mTitle, titlePaint,
-                            (int) textPosition[2], Layout.Alignment.ALIGN_NORMAL,
-                            1.0f, 1.0f, true);
-                }
                 if (mDynamicTitleLayout != null) {
                     canvas.translate(textPosition[0], textPosition[1]);
                     mDynamicTitleLayout.draw(canvas);
@@ -81,14 +133,7 @@ class TextDrawer {
 
             if (!TextUtils.isEmpty(mDetails)) {
                 canvas.save();
-                if (hasRecalculated) {
-                    mDynamicDetailLayout = new DynamicLayout(mDetails, textPaint,
-                            (int) textPosition[2],
-                            Layout.Alignment.ALIGN_NORMAL,
-                            1.2f, 1.0f, true);
-                }
-                float offsetForTitle = mDynamicTitleLayout != null ? mDynamicTitleLayout.getHeight() :
-                        0;
+                float offsetForTitle = mDynamicTitleLayout != null ? mDynamicTitleLayout.getHeight() : 0;
                 if (mDynamicDetailLayout != null) {
                     canvas.translate(textPosition[0], textPosition[1] + offsetForTitle);
                     mDynamicDetailLayout.draw(canvas);
@@ -116,6 +161,7 @@ class TextDrawer {
         }
     }
 
+	Rect showcase;
     /**
      * Calculates the best place to position text
      *  @param canvasW width of the screen
@@ -124,7 +170,7 @@ class TextDrawer {
      */
     public void calculateTextPosition(int canvasW, int canvasH, ShowcaseView showcaseView, boolean shouldCentreText) {
 
-    	Rect showcase = showcaseView.hasShowcaseView() ?
+	    showcase = showcaseView.hasShowcaseView() ?
     			calculator.getShowcaseRect() :
     			new Rect();
     	
@@ -208,7 +254,9 @@ class TextDrawer {
     }
 
     public float[] getBestTextPosition() {
-        return mBestTextPosition;
+	    float[] result = new float[mBestTextPosition.length];
+        System.arraycopy(mBestTextPosition, 0, result, 0, mBestTextPosition.length);
+	    return result;
     }
 
     public boolean shouldDrawText() {

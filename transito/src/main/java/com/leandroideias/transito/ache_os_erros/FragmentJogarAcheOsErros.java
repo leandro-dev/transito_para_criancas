@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.PointTarget;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.leandroideias.baseutils.BaseFragment;
@@ -171,7 +172,7 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 		textViewQuantidadeErros.setText("" + erros);
 
 		//Verificações para ver se o jogo acabou
-		if(acertos == total){
+		if(acertos == total && !tutorialMode){
 			FragmentLevelCompletedAcheOsErros frag = new FragmentLevelCompletedAcheOsErros();
 			Bundle args = new Bundle();
 			int level = getArguments().getInt("extraFase", 1);
@@ -340,12 +341,110 @@ public class FragmentJogarAcheOsErros extends BaseFragment implements View.OnTou
 	}
 
 	private void startTutorial(){
-		ShowcaseView sv = new ShowcaseView.Builder(getActivity())
-				.setTarget(new ViewTarget(icPausar))
-				.setContentTitle("This is a demo")
-//				.setStyle(R.style.Transparent)
+		final ShowcaseView sv = new ShowcaseView.Builder(getActivity())
+				.setContentTitle("Caça Infratores")
+				.setContentText("Olá! Nesse jogo você deve encontrar quem está fazendo coisas erradas no trânsito. Vamos lá?")
 				.build();
+		sv.setButtonText("Continuar");
+		sv.setSkipButtonText("Pular");
+		sv.overrideButtonClick(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tutorialStepTwo();
+				sv.hide();
+			}
+		});
+		sv.overrideSkipButtonClick(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tutorialMode = false;
+				sv.hide();
+			}
+		});
 	}
+
+	private void tutorialStepTwo(){
+		Target target = getPositionTarget(new MyImageViewTag(R.drawable.level_um_erro_um, true, 1080f, 530f, 0f, 0f, 164f, 278f));
+		final ShowcaseView sv = new ShowcaseView.Builder(getActivity(), false)
+				.setContentText("Olhe para este pedestre andando na calçada. Clique nele para ver o que acontece.")
+				.setTarget(target)
+				.build();
+		sv.hideButton();
+		sv.hideSkipButton();
+		sv.overrideInterceptAllowedTouch(new View.OnTouchListener(){
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				sv.hide();
+				tutorialStepThree();
+				return false;
+			}
+		});
+	}
+
+	private void tutorialStepThree(){
+		final ShowcaseView sv = new ShowcaseView.Builder(getActivity())
+				.setContentTitle("Você errou!")
+				.setContentText("Ele não está cometendo nenhuma infração.")
+				.build();
+		sv.setButtonText("Continuar");
+		sv.hideSkipButton();
+		sv.overrideButtonClick(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tutorialStepFour();
+				sv.hide();
+			}
+		});
+	}
+	private void tutorialStepFour(){
+		Target target = getPositionTarget(new MyImageViewTag(R.drawable.level_um_erro_um, true, 1080f, 530f, 94f, 101f, 485f, 225f));
+		final ShowcaseView sv = new ShowcaseView.Builder(getActivity(), false)
+				.setContentText("Veja esse carro virando na contra-mão!")
+				.setTarget(target)
+				.build();
+		sv.hideButton();
+		sv.hideSkipButton();
+		sv.overrideInterceptAllowedTouch(new View.OnTouchListener(){
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				sv.hide();
+				tutorialStepFive();
+				return false;
+			}
+		});
+	}
+
+	private void tutorialStepFive(){
+		final ShowcaseView sv = new ShowcaseView.Builder(getActivity())
+				.setContentTitle("Fim!")
+				.setContentText("Terminou. Você conseguiu encontrar todo mundo que estava cometendo alguma infração. Evite culpar inocontes e conseguirá uma boa pontuação. Boa sorte!")
+				.build();
+		sv.setButtonText("Continuar");
+		sv.hideSkipButton();
+		sv.overrideButtonClick(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tutorialMode = false;
+				sv.hide();
+				updateTop();
+			}
+		});
+	}
+
+	private PointTarget getPositionTarget(MyImageViewTag tag){
+		int xValue = 0, yValue = 0;
+		xValue += layoutImagens.getLeft() + getView().getLeft();
+		yValue += layoutImagens.getTop() + getView().getTop();
+		int x = (int) (tag.getStartX() + (tag.getRegionWidth()/2));
+		int y = (int) (tag.getStartY() + (tag.getRegionHeight()/2));
+		x = (int) (layoutImagens.getWidth()*x/tag.getFullImageWidth());
+		y = (int) (layoutImagens.getHeight()*y/tag.getFullImageHeight());
+		xValue += x;
+		yValue += y + 150;
+		return new PointTarget(xValue, yValue);
+	}
+
+
 
 	/*private class TutorialShowcaseListener implements OnShowcaseEventListener {
 		private int tutorialStep;

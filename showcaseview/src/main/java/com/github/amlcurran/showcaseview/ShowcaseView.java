@@ -48,6 +48,7 @@ public class ShowcaseView extends RelativeLayout
     private static final int HOLO_BLUE = Color.parseColor("#33B5E5");
 
     private final Button mEndButton;
+	private final Button mSkipButton;
     private final TextDrawer textDrawer;
     private final ShowcaseDrawer showcaseDrawer;
     private final ShowcaseAreaCalculator showcaseAreaCalculator;
@@ -61,9 +62,11 @@ public class ShowcaseView extends RelativeLayout
 
     // Touch items
     private boolean hasCustomClickListener = false;
+	private boolean hasCustomSkipClickListener = false;
     private boolean blockTouches = true;
     private boolean hideOnTouch = false;
     private OnShowcaseEventListener mEventListener = OnShowcaseEventListener.NONE;
+	private OnTouchListener onTouchListener = null;
 
     private boolean hasAlteredText = false;
     private boolean hasNoTarget = false;
@@ -101,6 +104,7 @@ public class ShowcaseView extends RelativeLayout
         fadeOutMillis = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
         mEndButton = (Button) LayoutInflater.from(context).inflate(R.layout.showcase_button, null);
+	    mSkipButton = (Button) LayoutInflater.from(context).inflate(R.layout.showcase_button, null);
         if (newStyle) {
             showcaseDrawer = new NewShowcaseDrawer(getResources());
         } else {
@@ -124,12 +128,24 @@ public class ShowcaseView extends RelativeLayout
             lps.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             lps.setMargins(margin, margin, margin, margin);
             mEndButton.setLayoutParams(lps);
-            mEndButton.setText(android.R.string.ok);
             if (!hasCustomClickListener) {
                 mEndButton.setOnClickListener(hideOnClickListener);
             }
-            addView(mEndButton);
+            addView(mEndButton, lps);
         }
+
+	    if(mSkipButton.getParent() == null){
+		    int margin = (int) getResources().getDimension(R.dimen.button_margin);
+		    RelativeLayout.LayoutParams lps = (LayoutParams) generateDefaultLayoutParams();
+		    lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		    lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		    lps.setMargins(margin, margin, margin, margin);
+		    mSkipButton.setLayoutParams(lps);
+		    if (!hasCustomSkipClickListener) {
+			    mSkipButton.setOnClickListener(hideOnClickListener);
+		    }
+		    addView(mSkipButton);
+	    }
 
     }
 
@@ -234,6 +250,24 @@ public class ShowcaseView extends RelativeLayout
         hasCustomClickListener = true;
     }
 
+	public void overrideSkipButtonClick(OnClickListener listener){
+		if (shotStateStore.hasShot()) {
+			return;
+		}
+		if (mSkipButton != null) {
+			if (listener != null) {
+				mSkipButton.setOnClickListener(listener);
+			} else {
+				mSkipButton.setOnClickListener(hideOnClickListener);
+			}
+		}
+		hasCustomSkipClickListener = true;
+	}
+
+	public void overrideInterceptAllowedTouch(OnTouchListener listener){
+		onTouchListener = listener;
+	}
+
     public void setOnShowcaseEventListener(OnShowcaseEventListener listener) {
         if (listener != null) {
             mEventListener = listener;
@@ -247,6 +281,12 @@ public class ShowcaseView extends RelativeLayout
             mEndButton.setText(text);
         }
     }
+
+	public void setSkipButtonText(CharSequence text){
+		if(mSkipButton != null){
+			mSkipButton.setText(text);
+		}
+	}
 
     private void recalculateText() {
         boolean recalculatedCling = showcaseAreaCalculator.calculateShowcaseRect(showcaseX, showcaseY, showcaseDrawer);
@@ -339,7 +379,13 @@ public class ShowcaseView extends RelativeLayout
             return true;
         }
 
-        return blockTouches && distanceFromFocus > showcaseDrawer.getBlockedRadius();
+	    boolean retVal = blockTouches && distanceFromFocus > showcaseDrawer.getBlockedRadius();
+	    if(!retVal){
+		    if(onTouchListener != null){
+			    onTouchListener.onTouch(view, motionEvent);
+		    }
+	    }
+        return retVal;
     }
 
     private static void insertShowcaseView(ShowcaseView showcaseView, Activity activity) {
@@ -374,9 +420,17 @@ public class ShowcaseView extends RelativeLayout
         mEndButton.setVisibility(GONE);
     }
 
+	public void hideSkipButton(){
+		mSkipButton.setVisibility(GONE);
+	}
+
     public void showButton() {
         mEndButton.setVisibility(VISIBLE);
     }
+
+	public void showSkipButton(){
+		mSkipButton.setVisibility(VISIBLE);
+	}
 
     /**
      * Builder class which allows easier creation of {@link ShowcaseView}s.
@@ -533,6 +587,17 @@ public class ShowcaseView extends RelativeLayout
         mEndButton.setLayoutParams(layoutParams);
     }
 
+	/**
+	 * Change the position of the ShowcaseView's skip button from the default bottom-left position.
+	 *
+	 * @param layoutParams a {@link android.widget.RelativeLayout.LayoutParams} representing
+	 *                     the new position of the button
+	 */
+	@Override
+	public void setSkipButtonPosition(RelativeLayout.LayoutParams layoutParams) {
+		mSkipButton.setLayoutParams(layoutParams);
+	}
+
     /**
      * Set the duration of the fading in and fading out of the ShowcaseView
      */
@@ -575,9 +640,13 @@ public class ShowcaseView extends RelativeLayout
         int backgroundColor = styled.getColor(R.styleable.ShowcaseView_sv_backgroundColor, Color.argb(128, 80, 80, 80));
         int showcaseColor = styled.getColor(R.styleable.ShowcaseView_sv_showcaseColor, HOLO_BLUE);
         String buttonText = styled.getString(R.styleable.ShowcaseView_sv_buttonText);
+	    String skipButtonText = styled.getString(R.styleable.ShowcaseView_sv_skipButtonText);
         if (TextUtils.isEmpty(buttonText)) {
             buttonText = getResources().getString(android.R.string.ok);
         }
+	    if(TextUtils.isEmpty(skipButtonText)){
+		    skipButtonText = getResources().getString(android.R.string.cancel);
+	    }
         boolean tintButton = styled.getBoolean(R.styleable.ShowcaseView_sv_tintButtonColor, true);
 
         int titleTextAppearance = styled.getResourceId(R.styleable.ShowcaseView_sv_titleTextAppearance,
@@ -591,6 +660,7 @@ public class ShowcaseView extends RelativeLayout
         showcaseDrawer.setBackgroundColour(backgroundColor);
         tintButton(showcaseColor, tintButton);
         mEndButton.setText(buttonText);
+	    mSkipButton.setText(skipButtonText);
         textDrawer.setTitleStyling(titleTextAppearance);
         textDrawer.setDetailStyling(detailTextAppearance);
         hasAlteredText = true;
@@ -603,8 +673,10 @@ public class ShowcaseView extends RelativeLayout
     private void tintButton(int showcaseColor, boolean tintButton) {
         if (tintButton) {
             mEndButton.getBackground().setColorFilter(showcaseColor, PorterDuff.Mode.MULTIPLY);
+	        mSkipButton.getBackground().setColorFilter(showcaseColor, PorterDuff.Mode.MULTIPLY);
         } else {
             mEndButton.getBackground().setColorFilter(HOLO_BLUE, PorterDuff.Mode.MULTIPLY);
+	        mSkipButton.getBackground().setColorFilter(HOLO_BLUE, PorterDuff.Mode.MULTIPLY);
         }
     }
 

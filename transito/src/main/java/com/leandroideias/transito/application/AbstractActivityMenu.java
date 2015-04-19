@@ -33,7 +33,9 @@ public abstract class AbstractActivityMenu extends BaseActivity implements View.
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (Build.VERSION.SDK_INT >= 11) {
-			getActionBar().hide();
+			if(getActionBar() != null) {
+				getActionBar().hide();
+			}
 		}
 		getWindow().setFormat(PixelFormat.RGB_565);
 		setContentView(R.layout.activity_jogo);

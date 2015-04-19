@@ -10,7 +10,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_weight="1"
-		android:text="Ache os erros"
+		android:text="Caca Infratores"
 		android:layout_margin="25dp"/>
 	<Button
 		android:id="@+id/buttonJogoDaMemoria"
