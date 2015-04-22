@@ -3,7 +3,6 @@ apply plugin: 'android'
 android {
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
-
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 22
@@ -16,13 +15,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
     compile project(':baseUtils')
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:support-v4:+'
     compile 'com.android.support:recyclerview-v7:22.+'
     compile project(':showcaseview')
+    testCompile 'junit:junit:4.12'
 }

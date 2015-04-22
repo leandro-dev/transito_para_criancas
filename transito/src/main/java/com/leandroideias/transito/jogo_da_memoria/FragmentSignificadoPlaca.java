@@ -6,13 +6,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,20 +22,19 @@ import android.widget.ListView;
 
 import com.leandroideias.baseutils.BaseFragment;
 import com.leandroideias.transito.R;
-import com.leandroideias.transito.adapters.AdapterSingleItemChoice;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FragmentSignificadoPlaca extends DialogFragment implements AdapterView.OnItemClickListener, View.OnClickListener {
+public class FragmentSignificadoPlaca extends BaseFragment implements View.OnClickListener {
 	public static final String TAG = "FragmentSignificadoPlaca";
 	public static final String ARG_ITEM = "item";
 	public static final String ARG_DIFICULDADE = "dificuldade";
 	public static final String STATE_SIGNIFICADOS = "PossiveisSignificados";
 	public static final String STATE_SIGNIFICADO_CORRETO = "PosicaoDoSignificadoCorreto";
 
-	private FragmentJogarJogoDaMemoria.Dificuldade dificuldade;
+	private GameManager.Dificuldade dificuldade;
 	private ItemAdapterGridJogoDaMemoria item;
 	private OnFragmentSignificadoPlacaInteractionListener mListener;
 
@@ -44,11 +44,11 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
 	private AdapterSingleItemChoice adapterSingleItemChoice;
 	private LinearLayout linearLayoutSignificados;
 	private ImageView imageViewPlaca;
-	private ListView listViewRespostas;
+	private RecyclerView recyclerViewRespostas;
 	private Button buttonConfirmar;
 
 
-    public static FragmentSignificadoPlaca newInstance(FragmentJogarJogoDaMemoria.Dificuldade dificuldade, ItemAdapterGridJogoDaMemoria item) {
+    public static FragmentSignificadoPlaca newInstance(GameManager.Dificuldade dificuldade, ItemAdapterGridJogoDaMemoria item) {
         FragmentSignificadoPlaca fragment = new FragmentSignificadoPlaca();
         Bundle args = new Bundle();
         args.putSerializable(ARG_ITEM, item);
@@ -65,7 +65,7 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
         super.onCreate(savedInstanceState);
 		try{
             item = (ItemAdapterGridJogoDaMemoria) getArguments().getSerializable(ARG_ITEM);
-			dificuldade = FragmentJogarJogoDaMemoria.Dificuldade.values()[getArguments().getInt(ARG_DIFICULDADE)];
+			dificuldade = GameManager.Dificuldade.values()[getArguments().getInt(ARG_DIFICULDADE)];
         } catch(Exception e){
 			throw new RuntimeException("Não foi possível obter a dificuldade ou o o item que deve ser usado. Está utilizando FragmentSignificadoPlaca.newInstance() ?");
 		}
@@ -87,20 +87,19 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
 
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-		getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-		setCancelable(false);
-        View view = inflater.inflate(R.layout.fragment_significado_placa, container, false);
+		View view = inflater.inflate(R.layout.fragment_significado_placa, container, false);
+
 		linearLayoutSignificados = (LinearLayout) view.findViewById(R.id.linearLayoutSignificados);
 		imageViewPlaca = (ImageView) view.findViewById(R.id.imageViewPlaca);
-		listViewRespostas = (ListView) view.findViewById(R.id.listViewRespostas);
+		recyclerViewRespostas = (RecyclerView) view.findViewById(R.id.recyclerView);
 		buttonConfirmar = (Button) view.findViewById(R.id.buttonConfirmar);
 
 		imageViewPlaca.setImageResource(item.getImageResId());
-		adapterSingleItemChoice = new AdapterSingleItemChoice(getActivity(), possiveisSignificados);
-		listViewRespostas.setAdapter(adapterSingleItemChoice);
-		listViewRespostas.setOnItemClickListener(this);
+		adapterSingleItemChoice = new AdapterSingleItemChoice(possiveisSignificados);
+		recyclerViewRespostas.setAdapter(adapterSingleItemChoice);
+		recyclerViewRespostas.setLayoutManager(new MyLinearLayoutManager(getActivity()));
 
+		buttonConfirmar.setOnClickListener(this);
 		return view;
     }
 
@@ -123,17 +122,12 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
     }
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		adapterSingleItemChoice.setSelectedPosition(position);
-		buttonConfirmar.setOnClickListener(this);
-	}
-
-	@Override
-	public void onClick(View view) {
+	public synchronized void onClick(View view) {
 		switch(view.getId()){
 			case R.id.buttonConfirmar:
+				Integer position = adapterSingleItemChoice.getSelectedPosition();
+				if(position == null) return;
 				buttonConfirmar.setOnClickListener(null);
-				int position = adapterSingleItemChoice.getSelectedPosition();
 				String significadoPlaca = obterSignificadoPlaca(item.getImageResId());
 				final boolean isCorrectAnswer = significadoPlaca.equals(adapterSingleItemChoice.getItem(position));
 				if(isCorrectAnswer){
@@ -145,7 +139,7 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
 					buttonConfirmar.setBackgroundResource(R.drawable.shape_button_red);
 					buttonConfirmar.setText(R.string.wrong);
 					//Faz a busca para saber quem que é o correto!
-					for(int a = 0; a < adapterSingleItemChoice.getCount(); a++){
+					for(int a = 0; a < adapterSingleItemChoice.getItemCount(); a++){
 						if(significadoPlaca.equals(adapterSingleItemChoice.getItem(a))){
 							adapterSingleItemChoice.setCorrectPosition(a);
 							break;
@@ -161,7 +155,7 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
 						if(mListener != null){
 							mListener.onSignificadoPlacaResult(isCorrectAnswer);
 						}
-						dismiss();
+						getFragmentManager().popBackStack();
 					}
 				}, (isCorrectAnswer? 1500 : 3000));
 				break;
@@ -367,6 +361,10 @@ public class FragmentSignificadoPlaca extends DialogFragment implements AdapterV
 		return null;
 	}
 
+	@Override
+	public boolean onBackPressed() {
+		return true;
+	}
 }
 
 

@@ -1,11 +1,14 @@
 package com.leandroideias.transito.jogo_da_memoria;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.leandroideias.baseutils.BaseFragment;
@@ -14,7 +17,6 @@ import com.leandroideias.transito.bll.JogoDaMemoriaBll;
 import com.leandroideias.transito.model.ItemDatabase;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,12 +26,9 @@ import java.util.List;
 public class FragmentJogarJogoDaMemoria extends BaseFragment implements FragmentSignificadoPlaca.OnFragmentSignificadoPlacaInteractionListener {
 	private ActivityJogarJogoDaMemoria mActivity;
 	private ImageView iconePausar;
-	private GridView gridView;
+	private GameManager gameManager;
+	private RecyclerView recyclerView;
 	private AdapterGridJogoDaMemoria adapter;
-
-	public enum Dificuldade{
-		FACIL, MEDIO, DIFICIL
-	}
 
 
 	@Override
@@ -48,7 +47,7 @@ public class FragmentJogarJogoDaMemoria extends BaseFragment implements Fragment
 
 	private void initView(View view) {
 		iconePausar = (ImageView) view.findViewById(R.id.ic_pausar);
-		gridView = (GridView) view.findViewById(R.id.gridViewJogoDaMemoria);
+		recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 
 		iconePausar.setOnClickListener(new View.OnClickListener(){
 			public void onClick(View view) {
@@ -57,88 +56,31 @@ public class FragmentJogarJogoDaMemoria extends BaseFragment implements Fragment
 		});
 
 		int fase = getArguments().getInt("extraFase", 1);
-		List<ItemAdapterGridJogoDaMemoria> lista;
-		Dificuldade dificuldade;
-		int quantItens;
-		switch(fase){
-			case 1:
-				dificuldade = Dificuldade.FACIL;
-				quantItens = 4;
-				break;
-			case 2:
-				dificuldade = Dificuldade.FACIL;
-				quantItens = 5;
-				break;
-			case 3:
-				dificuldade = Dificuldade.FACIL;
-				quantItens = 6;
-				break;
-			case 4:
-				dificuldade = Dificuldade.MEDIO;
-				quantItens = 6;
-				break;
-			case 5:
-				dificuldade = Dificuldade.MEDIO;
-				quantItens = 7;
-				break;
-			case 6:
-				dificuldade = Dificuldade.MEDIO;
-				quantItens = 8;
-				break;
-			case 7:
-				dificuldade = Dificuldade.DIFICIL;
-				quantItens = 8;
-				break;
-			case 8:
-				dificuldade = Dificuldade.DIFICIL;
-				quantItens = 9;
-				break;
-			case 9:
-				dificuldade = Dificuldade.DIFICIL;
-				quantItens = 10;
-				break;
-			case 10:
-			default:
-				dificuldade = Dificuldade.DIFICIL;
-				quantItens = 10;
-				break;
-		}
-		lista = generateList(dificuldade, quantItens);
-		adapter = new AdapterGridJogoDaMemoria(this, dificuldade, lista);
-		gridView.setAdapter(adapter);
-		gridView.setOnItemClickListener(adapter);
-	}
+		gameManager = new GameManager(this);
+		List<ItemAdapterGridJogoDaMemoria> lista = gameManager.construirListaItens(fase);
+		adapter = new AdapterGridJogoDaMemoria(gameManager, lista);
+		gameManager.setAdapter(adapter);
+		recyclerView.setAdapter(adapter);
 
-	private List<ItemAdapterGridJogoDaMemoria> generateList(Dificuldade dificuldade, int quantItens){
-		List<Integer> listaResources = new ArrayList<Integer>();
-		switch(dificuldade){
-			case FACIL:
-				listaResources = Arrays.asList(R.drawable.placa_r1, R.drawable.placa_r2, R.drawable.placa_r4b, R.drawable.placa_r26,
-						R.drawable.placa_a2b, R.drawable.placa_a14, R.drawable.placa_a45);
-				break;
-			case MEDIO:
-				listaResources = Arrays.asList(R.drawable.placa_r6b, R.drawable.placa_r5a, R.drawable.placa_r19, R.drawable.placa_r25d, R.drawable.placa_r28,
-						R.drawable.placa_a1b, R.drawable.placa_a7b, R.drawable.placa_a18, R.drawable.placa_a32b, R.drawable.placa_a24);
-				break;
-			case DIFICIL:
-				listaResources = Arrays.asList(R.drawable.placa_r12, R.drawable.placa_r25b, R.drawable.placa_r29,
-						R.drawable.placa_r7, R.drawable.placa_r6a, R.drawable.placa_r6c, R.drawable.placa_r15,
-						R.drawable.placa_a19, R.drawable.placa_a20a, R.drawable.placa_a22, R.drawable.placa_a35,
-						R.drawable.placa_a44, R.drawable.placa_a42a);
-				break;
-			default:
-				return null;
-		}
-		if(listaResources.size() < quantItens) throw new RuntimeException("Não existem a quantidade de itens requisitados para a dificuldade escolhida.");
-		Collections.shuffle(listaResources);
-		List<ItemAdapterGridJogoDaMemoria> listaItens = new ArrayList<ItemAdapterGridJogoDaMemoria>(2*quantItens);
-		for(int a = 0; a < quantItens; a++){
-			listaItens.add(new ItemAdapterGridJogoDaMemoria(listaResources.get(a)));
-			listaItens.add(new ItemAdapterGridJogoDaMemoria(listaResources.get(a)));
-		}
-		Collections.shuffle(listaItens);
+		recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				ViewGroup.MarginLayoutParams mlp = ((ViewGroup.MarginLayoutParams) recyclerView.getLayoutParams());
+				int totalWidth = recyclerView.getWidth() - recyclerView.getPaddingRight() - recyclerView.getPaddingLeft() - mlp.rightMargin - mlp.leftMargin;
+				int totalHeight = recyclerView.getHeight() - recyclerView.getPaddingTop() - recyclerView.getPaddingBottom() - mlp.topMargin - mlp.bottomMargin;
+				DisposicaoItensGrid disp = calcularTamanhoItem(totalWidth, totalHeight, 20);
+				GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), disp.getColunas());
+				recyclerView.setLayoutManager(layoutManager);
 
-		return listaItens;
+				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+					recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+				} else {
+					//noinspection deprecation
+					recyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				}
+				recyclerView.invalidate();
+			}
+		});
 	}
 
 	//Chamado pelo adapter quando tiver terminado a fase.
@@ -153,11 +95,108 @@ public class FragmentJogarJogoDaMemoria extends BaseFragment implements Fragment
 		frag.setArguments(args);
 		frag.setCancelable(false);
 		frag.show(getActivity().getSupportFragmentManager(), FragmentGameCompletedJogoDaMemoria.TAG);
-//		"itemDatabaseJogoDaVelha"
 	}
 
 	@Override
 	public void onSignificadoPlacaResult(boolean isCorrect) {
-		adapter.onSignificadoPlacaResult(isCorrect);
+		gameManager.tratarRespostaDialogoPergunta(isCorrect);
+	}
+
+	/**
+	 * Buscamos maximizar o tamanho do cartão, mas sem exceder os limites da tela, para evitar o scroll.
+	 * @param screenWidth Largura da tela
+	 * @param screenHeight Altura da tela
+	 * @param numberOfItens Quantidade de itens que devem ser inseridos.
+	 */
+	public DisposicaoItensGrid calcularTamanhoItem(int screenWidth, int screenHeight, int numberOfItens){
+		boolean flagTroca = false; //Flag para trocar altura e largura
+		if(screenHeight > screenWidth){
+			flagTroca = true;
+			int aux = screenHeight;
+			screenHeight = screenWidth;
+			screenWidth = aux;
+		}
+		double dif = ((double) screenHeight)/screenWidth;
+		double desiredNumberOfColumns = Math.sqrt(((double)numberOfItens) / dif);
+		double desiredNumberOfRows = desiredNumberOfColumns * dif;
+
+		//Existem 3 possíveis respostas...
+		List<DisposicaoItensGrid> list = new ArrayList<DisposicaoItensGrid>();
+		int auxCols = (int) Math.floor(desiredNumberOfColumns);
+		int auxRows = (int) Math.floor(desiredNumberOfRows);
+		list.add(new DisposicaoItensGrid((int) Math.ceil(desiredNumberOfColumns), (int) Math.ceil(desiredNumberOfRows), screenWidth, screenHeight, numberOfItens));
+		list.add(new DisposicaoItensGrid((int) Math.ceil(((double) numberOfItens) / auxRows), auxRows, screenWidth, screenHeight, numberOfItens));
+		list.add(new DisposicaoItensGrid(auxCols, (int) Math.ceil(((double) numberOfItens) / auxCols), screenWidth, screenHeight, numberOfItens));
+		Collections.sort(list);
+
+		DisposicaoItensGrid disp = list.get(0);
+		if(flagTroca){
+			disp.swapOrientation();
+		}
+		return disp;
+	}
+
+	public static class DisposicaoItensGrid implements Comparable<DisposicaoItensGrid>{
+		private int colunas;
+		private int linhas;
+		private int screenWidth;
+		private int screenHeight;
+		private int numberOfCards;
+		private int menorLado;
+		private int maiorLado;
+
+		private DisposicaoItensGrid(int colunas, int linhas, int screenWidth, int screenHeight, int numberOfCards) {
+			this.colunas = colunas;
+			this.linhas = linhas;
+			this.screenWidth = screenWidth;
+			this.screenHeight = screenHeight;
+			this.numberOfCards = numberOfCards;
+
+			measure();
+		}
+
+		public int getMenorLado() {
+			return menorLado;
+		}
+
+		public int getMaiorLado() {
+			return maiorLado;
+		}
+
+		public int getColunas() {
+			return colunas;
+		}
+
+		public int getLinhas() {
+			return linhas;
+		}
+
+		public void swapOrientation(){
+			int aux;
+			aux = colunas;
+			colunas = linhas;
+			linhas = aux;
+			aux = screenWidth;
+			screenWidth = screenHeight;
+			screenHeight = aux;
+		}
+
+		private void measure(){
+			int ladoA = (int) Math.floor(((double)screenWidth) / colunas);
+			int ladoB = (int) Math.floor(((double)screenHeight) / linhas);
+			menorLado = Math.min(ladoA, ladoB);
+			maiorLado = Math.max(ladoA, ladoB);
+		}
+
+		@Override
+		public int compareTo(DisposicaoItensGrid another) {
+			if(this == another) return 0;
+
+			if(menorLado != another.getMenorLado()){
+				return another.getMenorLado() - menorLado;
+			} else {
+				return another.getMaiorLado() - maiorLado;
+			}
+		}
 	}
 }

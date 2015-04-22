@@ -1,6 +1,8 @@
-package com.leandroideias.transito.adapters;
+package com.leandroideias.transito.jogo_da_memoria;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,64 +18,47 @@ import com.leandroideias.transito.R;
 /**
  * Created by Leandro on 11/8/2014.
  */
-public class AdapterSingleItemChoice extends BaseAdapter {
-	private LayoutInflater inflater;
+public class AdapterSingleItemChoice extends RecyclerView.Adapter<AdapterSingleItemChoice.Holder> {
 	private String[] itens;
 	private Integer selectedPosition;
 	private Integer wrongPosition;
 	private Integer correctPosition;
 
-	public AdapterSingleItemChoice(Context context, String[] itens){
-		inflater = LayoutInflater.from(context);
+	public AdapterSingleItemChoice(String[] itens){
 		this.itens = itens;
 		this.selectedPosition = null;
 	}
 
 	@Override
-	public int getCount() {
-		return itens.length;
+	public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list_single_choice, parent, false);
+		Holder holder = new Holder(view);
+		view.setTag(holder);
+		return holder;
 	}
 
 	@Override
-	public Object getItem(int i) {
-		return itens[i];
-	}
-
-	@Override
-	public long getItemId(int i) {
-		return i;
-	}
-
-	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
-		Holder holder;
-		if(convertView == null){
-			convertView = inflater.inflate(R.layout.item_list_single_choice, parent, false);
-			holder = new Holder(convertView);
-			convertView.setTag(holder);
-		} else {
-			holder = (Holder) convertView.getTag();
-		}
-
-		holder.getRadioButton().setOnTouchListener(new View.OnTouchListener(){
-			public boolean onTouch(View view, MotionEvent motionEvent) {
-				setSelectedPosition(position);
-				return true;
-			}
-		});
+	public void onBindViewHolder(Holder holder, int position) {
+		holder.getTextView().setMovementMethod(new ScrollingMovementMethod());
 
 		holder.getRadioButton().setChecked(selectedPosition != null && selectedPosition == position);
 		if(wrongPosition != null && wrongPosition == position){
 			holder.getResultIcon().setImageResource(R.drawable.ic_close_mini);
 			holder.getRadioButton().setVisibility(View.INVISIBLE);
-		}
-		if(correctPosition != null && correctPosition == position){
+		} else if(correctPosition != null && correctPosition == position){
 			holder.getResultIcon().setImageResource(R.drawable.ic_correct_mini);
 			holder.getRadioButton().setVisibility(View.INVISIBLE);
+		} else {
+			holder.getResultIcon().setImageBitmap(null);
+			holder.getRadioButton().setVisibility(View.VISIBLE);
 		}
+		holder.getRadioButton().setSelected(selectedPosition != null && selectedPosition == position);
 		holder.getTextView().setText(itens[position]);
+	}
 
-		return convertView;
+	@Override
+	public int getItemCount() {
+		return itens.length;
 	}
 
 	public void setSelectedPosition(int position){
@@ -81,7 +66,11 @@ public class AdapterSingleItemChoice extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 
-	public int getSelectedPosition(){
+	public String getItem(int position){
+		return itens[position];
+	}
+
+	public Integer getSelectedPosition(){
 		return selectedPosition;
 	}
 
@@ -93,7 +82,7 @@ public class AdapterSingleItemChoice extends BaseAdapter {
 		this.correctPosition = correctPosition;
 	}
 
-	private class Holder{
+	public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener{
 		private View rootView;
 
 		private ImageView resultIcon;
@@ -101,7 +90,11 @@ public class AdapterSingleItemChoice extends BaseAdapter {
 		private TextView textView;
 
 		public Holder(View rootView){
+			super(rootView);
 			this.rootView = rootView;
+			rootView.setOnClickListener(this);
+			getRadioButton().setOnClickListener(this);
+			getTextView().setOnClickListener(this);
 		}
 
 		public ImageView getResultIcon(){
@@ -117,6 +110,12 @@ public class AdapterSingleItemChoice extends BaseAdapter {
 		public TextView getTextView(){
 			if(textView == null) textView = (TextView) rootView.findViewById(R.id.textView);
 			return textView;
+		}
+
+		@Override
+		public void onClick(View v) {
+			selectedPosition = getAdapterPosition();
+			notifyDataSetChanged();
 		}
 	}
 }

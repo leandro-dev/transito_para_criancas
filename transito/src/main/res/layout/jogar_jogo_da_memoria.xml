@@ -20,8 +20,13 @@
 			android:src="@drawable/ic_pause"/>
 	</LinearLayout>
 
+	<android.support.v7.widget.RecyclerView
+		android:layout_marginRight="0dp"
+		android:id="@+id/recyclerView"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
 
-	<GridView
+	<!--<GridView
 		android:id="@+id/gridViewJogoDaMemoria"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
@@ -32,5 +37,5 @@
 		android:numColumns="auto_fit"
 		android:columnWidth="75dp"
 		android:stretchMode="columnWidth"
-		android:gravity="center" />
+		android:gravity="center" />-->
 </LinearLayout>

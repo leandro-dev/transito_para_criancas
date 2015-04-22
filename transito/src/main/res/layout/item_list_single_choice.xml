@@ -2,11 +2,14 @@
 
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
+	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:gravity="center"
 	android:orientation="horizontal"
-	android:padding="10dp">
+	android:paddingLeft="10dp"
+	android:paddingRight="10dp"
+	android:paddingTop="5dp"
+	android:paddingBottom="5dp">
 
 	<FrameLayout
 		android:layout_width="wrap_content"
@@ -28,13 +31,15 @@
 
 	<TextView
 		android:id="@+id/textView"
-		android:layout_width="match_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:focusable="false"
 		android:gravity="center_vertical|left"
 		android:paddingLeft="15dp"
-		android:paddingRight="15dp"
-		android:singleLine="true"
+		android:paddingRight="0dp"
+		android:ellipsize="none"
+		android:scrollbars="none"
+		android:maxLines="2"
 		android:text="Escolha uma opção."
 		android:textSize="20sp"/>
 

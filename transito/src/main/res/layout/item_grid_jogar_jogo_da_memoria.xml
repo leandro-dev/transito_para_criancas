@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.leandroideias.baseutils.GridSquareLayout
+<com.leandroideias.transito.custom.SquareFrameLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
@@ -15,4 +15,4 @@
 		android:adjustViewBounds="true"
 		android:scaleType="fitXY"
 		android:src="@drawable/brasil2" />
-</com.leandroideias.baseutils.GridSquareLayout>
+</com.leandroideias.transito.custom.SquareFrameLayout>

@@ -36,4 +36,15 @@ public class ItemAdapterGridJogoDaMemoria implements Serializable{
 	public void setFound(boolean found) {
 		this.found = found;
 	}
+
+	@Override
+	public boolean equals(Object object) {
+		if(this == object) return true;
+		if(!(object instanceof ItemAdapterGridJogoDaMemoria)) return false;
+
+		ItemAdapterGridJogoDaMemoria item = ((ItemAdapterGridJogoDaMemoria) object);
+		return ((imageResId == item.getImageResId())
+				&& (hidden == item.isHidden())
+				&& (found == item.isFound()));
+	}
 }
