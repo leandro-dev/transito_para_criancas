@@ -10,7 +10,8 @@ O primeiro jogo é um jogo da memória simples, com as placas de trânsito e que
 O segundo jogo é um jogo de achar os erros na imagem. Mostra um cenário de trânsito com pessoas cometendo infrações, e o usuário deve ser capaz de identificá-las clicando na tela.
 
 ## Google Play
-O jogo ainda não está disponível para download no Google play, mas em breve irei colocar.
+O jogo está disponível para download no Google Play:<br/>
+https://play.google.com/store/apps/details?id=com.leandroideias.transito
 
 ![Imagem Jogo dos erros](http://i.imgur.com/xpudMvm.png)
 ![Imagem Jogo da memória](http://i.imgur.com/9NRelAx.png)
